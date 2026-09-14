@@ -1,0 +1,40 @@
+services:
+  joomla-db:
+    image: mariadb:10.11
+    container_name: joomla-mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: joomla_root_pass
+      MYSQL_DATABASE: joomla_db
+      MYSQL_USER: joomla_user
+      MYSQL_PASSWORD: change_me_in_production
+    volumes:
+      - joomla-db-data:/var/lib/mysql
+    networks:
+      - joomla-network
+
+  joomla:
+    image: joomla:latest
+    container_name: joomla-app
+    restart: always
+    depends_on:
+      - joomla-db
+    ports:
+      - "8095:80"
+    environment:
+      JOOMLA_DB_HOST: joomla-db
+      JOOMLA_DB_USER: joomla_user
+      JOOMLA_DB_PASSWORD: change_me_in_production
+      JOOMLA_DB_NAME: joomla_db
+    volumes:
+      - ./joomla-data:/var/www/html
+    networks:
+      - joomla-network
+
+networks:
+  joomla-network:
+    driver: bridge
+
+volumes:
+  joomla-db-data:
+    driver: local

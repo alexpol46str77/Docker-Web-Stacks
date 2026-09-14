@@ -1,0 +1,40 @@
+services:
+  db:
+    image: mariadb:10.11
+    container_name: wp-mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_placeholder
+      MYSQL_DATABASE: wordpress_db
+      MYSQL_USER: wp_user
+      MYSQL_PASSWORD: change_me_in_production
+    volumes:
+      - wp-db-data:/var/lib/mysql
+    networks:
+      - wp-network
+
+  wordpress:
+    image: wordpress:latest
+    container_name: wp-app
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8090:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wp_user
+      WORDPRESS_DB_PASSWORD: change_me_in_production
+      WORDPRESS_DB_NAME: wordpress_db
+    volumes:
+      - ./wp-data:/var/www/html
+    networks:
+      - wp-network
+
+networks:
+  wp-network:
+    driver: bridge
+
+volumes:
+  wp-db-data:
+    driver: local

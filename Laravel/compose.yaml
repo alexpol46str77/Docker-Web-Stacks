@@ -1,0 +1,42 @@
+services:
+  laravel:
+    image: php:8.3-cli
+    command: php artisan serve --host=0.0.0.0 --port=8000
+    working_dir: /var/www/html
+    restart: always
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    ports:
+      - '8000:8000'
+    environment:
+      WWWUSER: 1000
+      LARAVEL_SAIL: 1
+      XDEBUG_MODE: 'off'
+    volumes:
+      - '.:/var/www/html'
+    networks:
+      - app-network
+    depends_on:
+      - postgres
+
+  postgres:
+    image: 'postgres:16-alpine'
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: 'laravel_db'
+      POSTGRES_USER: 'laravel_user'
+      POSTGRES_PASSWORD: 'change_me_in_production'
+    volumes:
+      - 'laravel-postgres:/var/lib/postgresql/data'
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  laravel-postgres:
+    driver: local
